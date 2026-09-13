@@ -12,6 +12,10 @@ for MVP Baseball 2005 on PS2.
 This will only work for the PS2 version of MVP Baseball 2005, not for other
 platforms or games.
 
+The [direct roster generator](direct_generator/) can build PS2 and PC rosters
+from the tracked CSV without driving the in-game roster editor. It requires the
+game's database files as input.
+
 ## Instructions (advanced)
 
 Download the latest memory card from [Releases page](https://github.com/CollinErickson/MVP2005/releases/).

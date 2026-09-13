@@ -14,3 +14,9 @@ images/*
 autohotkey/make_player_p1.ahk
 autohotkey/nerf_one_*.ahk
 autohotkey/
+
+# Direct generator inputs extracted from legally owned game media and outputs.
+direct_generator/work/
+direct_generator/output/
+direct_generator/**/__pycache__/
+direct_generator/.ruff_cache/

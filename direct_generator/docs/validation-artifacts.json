@@ -1,0 +1,19 @@
+{
+  "schema": "mvp-validation-artifacts/v1",
+  "snapshot": "2026-09-05",
+  "season_test": {
+    "card_sha256": "1931405a4b13515e897406db60ac0378e491fada2afa1a18938b8cf60d0ef4b6",
+    "regular_season": "completed",
+    "postseason": "completed",
+    "emulator": "PCSX2 c616714 Devel"
+  },
+  "animation_audited": {
+    "card_sha256": "f7a8621e1ac76e241d2b9244c73d291a2e8e05b293dfd27893aa547dcabbd5c1",
+    "binary_reproduction": "byte-identical",
+    "separate_season_test": false,
+    "decoded_player_differences_from_season_test": {
+      "battingstance": 225,
+      "pitcher_delivery": 320
+    }
+  }
+}
