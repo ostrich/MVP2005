@@ -101,8 +101,8 @@ ootpdf_teammap <- ootpdf %>%
     
     if (any(is.na(.$level_id))) {
       cat("The following teams don't have matching level_id.", "\n")
-      cat("You probably need to redo ./data/ootp_team_to_org_map.", "\n")
-      print(. |> filter(is.na(org_id)) |> select(team_id, `Team Name`) |> unique())
+      cat("You probably need to redo ./data/ootp_league_to_level_map.", "\n")
+      print(. |> filter(is.na(level_id)) |> select(team_id, `Team Name`, `League Name`) |> unique())
     }
     
     stopifnot(!any(is.na(.$org_id)))
@@ -120,8 +120,8 @@ ootpdf_teammap <- ootpdf %>%
 
 # Add the org_id
 ootpdf <- ootpdf %>%
-  left_join(ootpdf_teammap %>% select(-team_id, -`League Name`),
-            by = c("Team Name"), 
+  left_join(ootpdf_teammap %>% select(-`League Name`),
+            by = c("team_id", "Team Name"),
             suffix = c('', '_teammap'))
 # Assert that all teams have a reasonable number of players
 ootpdf %>% filter(!is.na(team_id), level_id < 4.5) %>% 
