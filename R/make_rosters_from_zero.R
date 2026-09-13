@@ -105,6 +105,8 @@ make_rosters_from_zero <- function() {
                      file = save_progress_file_path)
   }
   
+  # A fresh run needs an empty log on disk for the initial backup.
+  initialize_created_players_log("./data/created_players.csv", step)
   # This csv tracks which players have been created
   if (file.exists("./data/created_players.csv")) {
     created_players <- readr::read_csv("./data/created_players.csv", lazy=FALSE)
@@ -844,6 +846,20 @@ make_rosters_from_zero <- function() {
   timestamp()
 }
 
+initialize_created_players_log <- function(path, step) {
+  if (file.exists(path)) return(invisible(NULL))
+  if (step > 0.5) {
+    stop("Missing player log for a resumed run: ", path,
+         ". Restore the log and progress file from the same memory-card backup.")
+  }
+  empty <- data.frame(bbrefminors_id=character(),
+                      "Birth Year"=integer(), "Birth Month"=integer(),
+                      "Birth Date"=integer(), created_time=character(),
+                      check.names=FALSE)
+  write.csv(empty, path, row.names=FALSE)
+  invisible(NULL)
+}
+
 save_memcard <- function () {
   cat("Backing up memcard and progress files...", "\n")
   Sys.sleep(2)
@@ -865,27 +881,33 @@ save_memcard <- function () {
   
   # Save copy of memcard, created players and progress csvs
   # Create folder for this memcard if not already there
-  if (!dir.exists(paste0('./data/progress_backups/', csv_date))) {
-    dir.create(paste0('./data/progress_backups/', csv_date))
+  backup_root <- paste0('./data/progress_backups/', csv_date)
+  if (!dir.exists(backup_root) &&
+      !dir.create(backup_root, recursive=TRUE)) {
+    stop("Unable to create backup directory: ", backup_root)
   }
   # Create folder for this backup
-  save_dir <- paste0('./data/progress_backups/', csv_date, '/', 
+  save_dir <- paste0(backup_root, '/',
                      gsub(".", "-", 
                           gsub(":", "-", Sys.time(), fixed=T),
                           fixed=T))
-  dir.create(save_dir)
-  # Copy mem card there
-  file.copy(paste0(
-    "G://My Drive//Games/PCSX2/memcards/MVP05Rosters-",
-    gsub("-","",csv_date),".ps2"),
-    paste0(save_dir, "/MVP05Rosters-",
-           gsub("-","",csv_date),".ps2"))
-  # Copy created_players.csv
-  file.copy("./data/created_players.csv",
-            paste0(save_dir, '/created_players.csv'))
-  # Copy create_rosters_from_zero_progress.csv
-  file.copy("./data/create_rosters_from_zero_progress.csv",
-            paste0(save_dir, '/create_rosters_from_zero_progress.csv'))
+  if (!dir.create(save_dir)) {
+    stop("Unable to create backup directory: ", save_dir)
+  }
+
+  backup_sources <- c(
+    paste0("G://My Drive//Games/PCSX2/memcards/MVP05Rosters-",
+           gsub("-", "", csv_date), ".ps2"),
+    "./data/created_players.csv",
+    "./data/create_rosters_from_zero_progress.csv"
+  )
+  backup_destinations <- file.path(save_dir, basename(backup_sources))
+  copied <- file.copy(backup_sources, backup_destinations)
+  if (!all(copied)) {
+    stop("Backup failed for: ",
+         paste(backup_sources[!copied], collapse=", "))
+  }
+  cat("Backup complete:", save_dir, "\n")
   
   # It returns to base page by itself
   # Assert ending in same place as started
