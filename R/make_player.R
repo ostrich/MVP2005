@@ -9,8 +9,11 @@ if (!exists('is_editable_player')) {
 # Make one player
 
 make_player_from_row <- function(df, from_zero=FALSE,
-                                 already_entered_player=FALSE) {
+                                 already_entered_player=FALSE,
+                                 roster_year=as.integer(substr(csv_date, 1, 4))) {
   stopifnot(is.data.frame(df), nrow(df)==1)
+  stopifnot(length(roster_year) == 1, !is.na(roster_year),
+            roster_year >= 2005, roster_year <= 2100)
   
   if (file.exists("./autohotkey/make_player_p1_done.txt")) {
     file.remove("./autohotkey/make_player_p1_done.txt")
@@ -98,15 +101,13 @@ make_player_from_row <- function(df, from_zero=FALSE,
   # Don't let it wrap around (starts on 1974, from 1961 to 1987)
   if (from_zero) {
     add(adjustLRcts(1975,
-                    df$`Birth Year` -  as.integer(substring(Sys.Date(),
-                                                            1,4)) + 2005,
+                    df$`Birth Year` - roster_year + 2005,
                     minval=1961, maxval=1987))
   } else {
     add(adjustLR(
       max(-13,
           min(13,
-              df$`Birth Year` - 1974 - as.integer(substring(Sys.Date(),
-                                                            1,4)) + 2005))))
+              df$`Birth Year` - 1974 - roster_year + 2005))))
   }
   
   # First position

@@ -5,8 +5,11 @@ if (!exists('typeout2')) {
 
 # Make one player
 
-morph_player_from_row <- function(df) {
+morph_player_from_row <- function(
+    df, roster_year=as.integer(substr(csv_date, 1, 4))) {
   stopifnot(is.data.frame(df), nrow(df)==1)
+  stopifnot(length(roster_year) == 1, !is.na(roster_year),
+            roster_year >= 2005, roster_year <= 2100)
   
   
   
@@ -88,8 +91,7 @@ morph_player_from_row <- function(df) {
   add(adjustLR(
     max(-13,
         min(13,
-            df$`Birth Year` - 1974 - as.integer(substring(Sys.Date(),
-                                                          1,4)) + 2005))))
+            df$`Birth Year` - 1974 - roster_year + 2005))))
   
   # First position
   add(
