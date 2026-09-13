@@ -1,5 +1,5 @@
 library(dplyr)
-if (!exists('typeout2')) {
+if (!exists('typeout2') || !exists('with_stable_seed')) {
   source("./R/helpers.R")
 }
 
@@ -10,6 +10,12 @@ morph_player_from_row <- function(
   stopifnot(is.data.frame(df), nrow(df)==1)
   stopifnot(length(roster_year) == 1, !is.na(roster_year),
             roster_year >= 2005, roster_year <= 2100)
+
+  pitch_trajectory <- with_stable_seed(
+    c("morph_player", df$bbrefminors_id, df$`Birth Year`,
+      df$`Birth Month`, df$`Birth Date`),
+    sample(-3:3, length(pitch_order), replace=TRUE)
+  )
   
   
   
@@ -639,7 +645,7 @@ morph_player_from_row <- function(
             '\n\n\t; Pitch Trajectory
       	    SendEvent "s" ; \t move to Pitch Trajectory
             ')
-          add(adjustLR(sample((-3):3, 1)))
+          add(adjustLR(pitch_trajectory[i]))
           
           # Pitch Control
           add(

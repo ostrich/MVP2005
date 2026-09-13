@@ -1,5 +1,5 @@
 library(dplyr)
-if (!exists('typeout2')) {
+if (!exists('typeout2') || !exists('with_stable_seed')) {
   source("./R/helpers.R")
 }
 if (!exists('is_editable_player')) {
@@ -14,6 +14,22 @@ make_player_from_row <- function(df, from_zero=FALSE,
   stopifnot(is.data.frame(df), nrow(df)==1)
   stopifnot(length(roster_year) == 1, !is.na(roster_year),
             roster_year >= 2005, roster_year <= 2100)
+
+  random_values <- with_stable_seed(
+    c("make_player", df$bbrefminors_id, df$`Birth Year`,
+      df$`Birth Month`, df$`Birth Date`),
+    list(
+      bat_color=sample(1:8, 1),
+      fielding_glove=sample(1:5, 1, prob=c(1,1,1,.2,.2)),
+      elbow_guard=sample(c('NONE', 1:3), 1, prob=c(4,1,1,1)),
+      shin_guard=sample(c('NONE', 1:2), 1, prob=c(4,1,1)),
+      wristband=sample(c('NONE', 1:6), 1, prob=c(20,1,1,1,1,1,1)),
+      socks=sample(c(-1,0,1), 1, prob=c(3,3,1)),
+      catcher_mask=sample(c(0,1), 1),
+      batting_gloves=sample(c(0,1), 1, prob=c(50,1)),
+      pitch_trajectory=sample(-3:3, length(pitch_order), replace=TRUE)
+    )
+  )
   
   if (file.exists("./autohotkey/make_player_p1_done.txt")) {
     file.remove("./autohotkey/make_player_p1_done.txt")
@@ -369,7 +385,7 @@ make_player_from_row <- function(df, from_zero=FALSE,
 	Sleep 40 ;
   ')
   # Bat color
-  add(adjustLRcts(1, sample(1:8,1), minval=1, maxval=8))
+  add(adjustLRcts(1, random_values$bat_color, minval=1, maxval=8))
   
   # Fielding glove
   add(
@@ -377,7 +393,7 @@ make_player_from_row <- function(df, from_zero=FALSE,
 	SendEvent "s" ; \t move to fielding glove
   '
   )
-  add(adjustLRcts(1, sample(1:5,1, prob=c(1,1,1,.2,.2)), minval=1, maxval=5))
+  add(adjustLRcts(1, random_values$fielding_glove, minval=1, maxval=5))
   
   # Elbow guard
   add(
@@ -385,7 +401,7 @@ make_player_from_row <- function(df, from_zero=FALSE,
 	SendEvent "s" ; \t move to elbow guard
   '
   )
-  add(adjustLRnoneorcts('NONE', sample(c('NONE', 1:3),1, prob=c(4,1,1,1))))
+  add(adjustLRnoneorcts('NONE', random_values$elbow_guard))
   
   # Shin guard
   add(
@@ -393,7 +409,7 @@ make_player_from_row <- function(df, from_zero=FALSE,
 	SendEvent "s" ; \t move to shin guard
   '
   )
-  add(adjustLRnoneorcts('NONE', sample(c('NONE', 1:2),1, prob=c(4,1,1))))
+  add(adjustLRnoneorcts('NONE', random_values$shin_guard))
   
   # Wristband
   add(
@@ -401,7 +417,7 @@ make_player_from_row <- function(df, from_zero=FALSE,
 	SendEvent "s" ; \t move to wristband
   '
   )
-  add(adjustLRnoneorcts('NONE', sample(c('NONE', 1:6),1, prob=c(20,1,1,1,1,1,1))))
+  add(adjustLRnoneorcts('NONE', random_values$wristband))
   
   # Socks
   add(
@@ -409,7 +425,7 @@ make_player_from_row <- function(df, from_zero=FALSE,
 	SendEvent "s" ; \t move to socks
   '
   )
-  add(adjustLR(sample(c(-1,0,1),1, prob=c(3,3,1))))
+  add(adjustLR(random_values$socks))
   
   # Catcher mask
   add(
@@ -417,7 +433,7 @@ make_player_from_row <- function(df, from_zero=FALSE,
 	SendEvent "s" ; \t move to catcher mask
   '
   )
-  add(adjustLR(sample(c(0,1),1, prob=c(1,1))))
+  add(adjustLR(random_values$catcher_mask))
   
   # Batting gloves
   add(
@@ -425,7 +441,7 @@ make_player_from_row <- function(df, from_zero=FALSE,
 	SendEvent "s" ; \t move to batting gloves
   '
   )
-  add(adjustLR(sample(c(0,1),1, prob=c(50,1))))
+  add(adjustLR(random_values$batting_gloves))
   
   
   
@@ -831,7 +847,7 @@ make_player_from_row <- function(df, from_zero=FALSE,
             '\n\n\t; Pitch Trajectory
       	    SendEvent "s" ; \t move to Pitch Trajectory
             ')
-          add(adjustLR(sample((-3):3, 1)))
+          add(adjustLR(random_values$pitch_trajectory[i]))
           
           # Pitch Control
           add(

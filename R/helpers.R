@@ -27,6 +27,41 @@
 # cat(typeout("azzzaa"))
 # cat(typeout("boo"))
 
+stable_seed <- function(...) {
+  seed_parts <- unlist(lapply(list(...), as.character), use.names=FALSE)
+  seed_text <- paste(seed_parts, collapse="\x1f")
+  hash <- 0
+  for (byte in as.integer(charToRaw(enc2utf8(seed_text)))) {
+    hash <- (hash * 131 + byte) %% 2147483647
+  }
+  as.integer(ifelse(hash == 0, 1, hash))
+}
+
+set_stable_seed <- function(...) {
+  set.seed(stable_seed(...), kind="Mersenne-Twister",
+           normal.kind="Inversion", sample.kind="Rejection")
+}
+
+with_stable_seed <- function(seed_key, code) {
+  previous_kind <- RNGkind()
+  had_random_seed <- exists(".Random.seed", envir=.GlobalEnv, inherits=FALSE)
+  if (had_random_seed) {
+    previous_random_seed <- get(".Random.seed", envir=.GlobalEnv,
+                                inherits=FALSE)
+  }
+  on.exit({
+    do.call(RNGkind, as.list(previous_kind))
+    if (had_random_seed) {
+      assign(".Random.seed", previous_random_seed, envir=.GlobalEnv)
+    } else if (exists(".Random.seed", envir=.GlobalEnv, inherits=FALSE)) {
+      rm(".Random.seed", envir=.GlobalEnv)
+    }
+  })
+
+  set_stable_seed(seed_key)
+  force(code)
+}
+
 charlocation <- list(
   a=c(2,1),
   b=c(3,5),

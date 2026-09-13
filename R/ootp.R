@@ -2,9 +2,13 @@
 library(dplyr)
 library(ggplot2)
 
-if (!exists('round_to_discrete')) {
-  source("./r/helpers.R")
+if (!exists('round_to_discrete') || !exists('set_stable_seed')) {
+  source("./R/helpers.R")
 }
+
+# Set the snapshot date when preparing an update; use the same date in readcsv.R.
+roster_date <- as.Date("2026-09-05")
+set_stable_seed("ootp", roster_date)
 
 # Read csv ----
 # ootpdf <- readr::read_csv("C:\\Users\\colli\\OneDrive\\Documents\\Out of the Park Developments\\OOTP Baseball 19\\saved_games\\New Game.lg\\import_export\\mlb_rosters2.txt")
@@ -978,7 +982,7 @@ stopifnot(!(MVPdf %>% filter(bbref_id!='ohtansh01') %>%
 # Write csv ----
 if (F) {
   readr::write_csv(MVPdf, 
-                   paste0("./data/MVProsters/MVProsters_", Sys.Date(), ".csv"))
+                   paste0("./data/MVProsters/MVProsters_", roster_date, ".csv"))
 }
 
 cat("Reached bottom of ootp.R\n")
